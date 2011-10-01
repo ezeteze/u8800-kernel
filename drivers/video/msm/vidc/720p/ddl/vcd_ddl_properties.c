@@ -1741,11 +1741,7 @@ void ddl_set_default_decoder_buffer_req(struct ddl_decoder_data_type *p_decoder,
 	p_input_buf_req->n_min_count = 1;
 	p_input_buf_req->n_actual_count = p_input_buf_req->n_min_count;
 	p_input_buf_req->n_max_count = DDL_MAX_BUFFER_COUNT;
-	p_input_buf_req->n_size = n_y_cb_cr_size;
-
-	if (p_input_buf_req->n_size >= ((1280*720*3) >> 1))
-		p_input_buf_req->n_size = (p_input_buf_req->n_size >> 1);
-
+	p_input_buf_req->n_size = (1280*720*3*3) >> 3;
 	p_input_buf_req->n_align = DDL_LINEAR_BUFFER_ALIGN_BYTES;
 
 	p_decoder->min_input_buf_req = *p_input_buf_req;
