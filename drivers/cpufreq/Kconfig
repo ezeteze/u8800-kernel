@@ -139,6 +139,10 @@ config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	  driver. Fallback governor will be the performance governor.
 endchoice
 
+config CPU_FREQ_GOV_LAZY
+        tristate "'lazy' cpufreq governor"
+        depends on CPU_FREQ
+
 config CPU_FREQ_GOV_INTERACTIVEX
 	tristate "'interactiveX' cpufreq policy governor"
 	help
