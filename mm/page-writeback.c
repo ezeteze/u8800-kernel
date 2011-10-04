@@ -535,7 +535,7 @@ static void balance_dirty_pages(struct address_space *mapping,
         		  break;    /* We've done our duty */
 		}
 
-		__set_current_state(TASK_UNINTERRUPTIBLE);
+		__set_current_state(TASK_INTERRUPTIBLE);
 		io_schedule_timeout(pause);
 
 		/*
