@@ -144,7 +144,7 @@ config CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
 	help
 	  Use the CPUFreq governor 'interactiveX' as default.
 
-config CPU_FREQ_GOV_LAZY
+config CPU_FREQ_DEFAULT_GOV_LAZY
         bool "lazy"
 	select CPU_FREQ_GOV_LAZY
         help
