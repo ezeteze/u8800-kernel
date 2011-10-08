@@ -57,7 +57,7 @@ config CPU_FREQ_VDD_LEVELS
 	  bool "CPU Vdd levels sysfs interface"
 	  depends on CPU_FREQ_STAT
 	  depends on ARCH_MSM7X30
-	  default n
+	  default y
 	  help
 	    CPU Vdd levels sysfs interface
 
@@ -137,6 +137,19 @@ config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	  Be aware that not all cpufreq drivers support the conservative
 	  governor. If unsure have a look at the help section of the
 	  driver. Fallback governor will be the performance governor.
+
+config CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
+	bool "interactivex"
+	select CPU_FREQ_GOV_INTERACTIVEX
+	help
+	  Use the CPUFreq governor 'interactiveX' as default.
+
+config CPU_FREQ_GOV_LAZY
+        bool "lazy"
+	select CPU_FREQ_GOV_LAZY
+        help
+	  Use the CPUFreq governor 'lazy' as default.
+
 endchoice
 
 config CPU_FREQ_GOV_LAZY
@@ -147,13 +160,6 @@ config CPU_FREQ_GOV_INTERACTIVEX
 	tristate "'interactiveX' cpufreq policy governor"
 	help
 	  'interactiveX' - Modified version of interactive with sleep+wake code.
-
-config CPU_FREQ_GOV_SAVAGEDZEN
-	tristate "'savagedzen' cpufreq governor"
-	depends on CPU_FREQ
-	help
-	  'Savaged-Zen' - a "smartass" based governor
-	  If in doubt, say N.
 	  
 config CPU_FREQ_GOV_SCARY
 	tristate "'scary' cpufreq governor"
@@ -162,14 +168,6 @@ config CPU_FREQ_GOV_SCARY
 		scary - a governor for cabbages
 
 		If in doubt, say N.
-
-config CPU_FREQ_GOV_BRAZILIANWAX
-	tristate "'brazilianwax' cpufreq governor"
-	depends on CPU_FREQ
-	help
-          brazilianwax' - a "slightly more agressive smart" optimized governor!
- 
-	  If in doubt, say Y.
 
 config CPU_FREQ_GOV_MINMAX
 	tristate "'minmax' cpufreq governor"
