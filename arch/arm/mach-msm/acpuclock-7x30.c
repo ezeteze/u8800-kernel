@@ -93,20 +93,17 @@ static struct clock_state drv_state = { 0 };
 static struct clkctl_acpu_speed *backup_s;
 
 static struct pll pll2_tbl[] = {
-	{  20, 5, 6, 0 },	/* 400 MHz */
-	{  26, 1, 24, 0 },	/* 500 MHz */
-	{  31, 1, 4, 0 },	/* 600 MHz */
-	{  41, 2, 3, 0 },	/* 800 MHz */
-	{  46, 7, 8, 0 },	/* 900 MHz */
-	{  52, 1, 12, 0 },	/* 1000 MHz */
-	{  57, 7, 24, 0 }, 	/* 1100 MHz */
-	{  62, 1, 2, 0 },	/* 1200 MHz */
-	{  67, 17, 24, 0 },	/* 1300 MHz */
-	{  72, 11, 12, 0 },	/* 1400 MHz */
-	{  78, 1, 8, 0 },	/* 1500 MHz */
-	{  83, 1, 3, 0 },	/* 1600 MHz */
-	{  88, 13, 24, 0 },	/* 1700 MHz */
-	{  93, 3, 4, 0 },	/* 1800 MHz */
+	{ 25, 0, 1, 0 },  /* 480 MHz */
+	{ 28, 1, 3, 0 },  /* 544 MHz */
+	{ 31, 1, 4, 0 },  /* 600 MHz */https://github.com/dzo/kernel_u8800/blob/1fa7a26cfc8b87166a02a987fad7959a52015ae0/arch/arm/mach-msm/acpuclock-7x30.c
+	{ 42, 0, 1, 0 },  /* 806 MHz */
+	{ 53, 1, 3, 0 },  /* 1024 MHz */
+	{ 125, 0, 1, 1 }, /* 1200 MHz */
+	{ 73, 0, 1, 0 },  /* 1401 MHz */
+	{ 79, 0, 1, 0 },  /* 1516 MHz */
+	{ 84, 0, 1, 0 },  /* 1612 MHz */
+	{ 89, 0, 1, 0 },  /* 1708 MHz */
+	{ 94, 0, 1, 0 },  /* 1804 MHz */
 };
 
 /* Use negative numbers for sources that can't be enabled/disabled */
@@ -119,30 +116,25 @@ static struct pll pll2_tbl[] = {
  * know all the h/w requirements.
  */
 static struct clkctl_acpu_speed acpu_freq_tbl[] = {
-	{ 0, 24576,   SRC_LPXO, 0, 0,    30720000,  900,  VDD_RAW(900),  LOW },
-	{ 0, 61440,   PLL_3,    5, 11,   61440000,  900,  VDD_RAW(900),  LOW },
-	{ 0, 122880,  PLL_3,    5, 5,    61440000,  900,  VDD_RAW(900),  LOW },
-	{ 0, 184320,  PLL_3,    5, 4,    61440000,  900,  VDD_RAW(900),  LOW },
-	{ 0, MAX_AXI_KHZ, SRC_AXI, 1, 0, 61440000,  900,  VDD_RAW(900),  LOW },
-	{ 0, 245760,  PLL_3,    5, 2,    61440000,  900,  VDD_RAW(900),  LOW },
-	{ 0, 368640,  PLL_3,    5, 1,  	 122800000, 900,  VDD_RAW(900),  LOW },
-	{ 1, 400000,  PLL_2,    3, 0,    122800000, 900,  VDD_RAW(900),  NOMINAL, &pll2_tbl[0]},
-	{ 1, 500000,  PLL_2,    3, 0,    122800000, 900,  VDD_RAW(900),  NOMINAL, &pll2_tbl[1]},
-	{ 1, 600000,  PLL_2,    3, 0,    122800000, 925,  VDD_RAW(925),  NOMINAL, &pll2_tbl[2]},
-	{ 1, 768000,  PLL_1,    2, 0,    153600000, 1050,  VDD_RAW(1050),  NOMINAL },
-	{ 1, 800000,  PLL_2,    3, 0,    UINT_MAX,  1100,  VDD_RAW(1100),  NOMINAL, &pll2_tbl[3]},
-	{ 1, 900000,  PLL_2,    3, 0,    UINT_MAX,  1150, VDD_RAW(1150), NOMINAL, &pll2_tbl[4]},
-	{ 1, 1000000, PLL_2,    3, 0,    UINT_MAX,  1200, VDD_RAW(1200), NOMINAL, &pll2_tbl[5]},
-	{ 1, 1100000, PLL_2,    3, 0,    UINT_MAX,  1200, VDD_RAW(1200), NOMINAL, &pll2_tbl[6]},
-	{ 1, 1200000, PLL_2,    3, 0,    UINT_MAX,  1200, VDD_RAW(1200), NOMINAL, &pll2_tbl[7]},
-	{ 1, 1300000, PLL_2,    3, 0,    UINT_MAX,  1225, VDD_RAW(1225), NOMINAL, &pll2_tbl[8]},
-	{ 1, 1400000, PLL_2,    3, 0,    UINT_MAX,  1250, VDD_RAW(1250), NOMINAL, &pll2_tbl[9]},
-	{ 1, 1500000, PLL_2,    3, 0,    UINT_MAX,  1300, VDD_RAW(1300), NOMINAL, &pll2_tbl[10]},
-	{ 1, 1600000, PLL_2,    3, 0,    UINT_MAX,  1350, VDD_RAW(1350), NOMINAL, &pll2_tbl[11]},
-	{ 1, 1700000, PLL_2,    3, 0,    UINT_MAX,  1400, VDD_RAW(1400), NOMINAL, &pll2_tbl[12]},
-	{ 1, 1800000, PLL_2,    3, 0,    UINT_MAX,  1425, VDD_RAW(1425), NOMINAL, &pll2_tbl[13]},
-
-	{ 0 }
+	{ 0, 24576,   SRC_LPXO, 0, 0, 30720000, 850, VDD_RAW(850), LOW },
+	{ 0, 61440,   PLL_3, 5, 11, 61440000, 850, VDD_RAW(850),      LOW },
+	{ 0, 122880,  PLL_3, 5, 5, 61440000,  850, VDD_RAW(850),      LOW },
+	{ 0, 184320,  PLL_3, 5, 4, 61440000,  850, VDD_RAW(850),      LOW },
+	{ 0, MAX_AXI_KHZ, SRC_AXI, 1, 0, 61440000, 850, VDD_RAW(850), LOW },
+	{ 0, 245760,  PLL_3, 5, 2, 61440000,  850, VDD_RAW(850),      LOW },
+	{ 1, 368640,  PLL_3, 5, 1, 122800000, 875, VDD_RAW(875),      LOW },
+	{ 1, 480000,  PLL_2, 3, 0, 122800000, 900, VDD_RAW(900),      NOMINAL, &pll2_tbl[0]},
+	{ 1, 544000,  PLL_2, 3, 0, 122800000, 900, VDD_RAW(900),      NOMINAL, &pll2_tbl[1]},
+	{ 1, 600000,  PLL_2, 3, 0, 122800000, 925, VDD_RAW(925),      NOMINAL, &pll2_tbl[2]},
+	{ 1, 768000,  PLL_1, 2, 0, 153600000, 950, VDD_RAW(950),      NOMINAL },
+	{ 1, 806400,  PLL_2, 3, 0, UINT_MAX,  975, VDD_RAW(975),      NOMINAL, &pll2_tbl[3]},
+	{ 1, 1024000, PLL_2, 3, 0, UINT_MAX, 1075, VDD_RAW(1075),     NOMINAL, &pll2_tbl[4]},
+	{ 1, 1200000, PLL_2, 3, 0, UINT_MAX, 1175, VDD_RAW(1175),     NOMINAL, &pll2_tbl[5]},
+	{ 1, 1401600, PLL_2, 3, 0, UINT_MAX, 1250, VDD_RAW(1250),     NOMINAL, &pll2_tbl[6]},
+	{ 1, 1516800, PLL_2, 3, 0, UINT_MAX, 1300, VDD_RAW(1300),     NOMINAL, &pll2_tbl[7]},
+	{ 1, 1612800, PLL_2, 3, 0, UINT_MAX, 1350, VDD_RAW(1350),     NOMINAL, &pll2_tbl[8]},
+	{ 1, 1708800, PLL_2, 3, 0, UINT_MAX, 1400, VDD_RAW(1400),     NOMINAL, &pll2_tbl[9]},
+	{ 1, 1804800, PLL_2, 3, 0, UINT_MAX, 1425, VDD_RAW(1425),     NOMINAL, &pll2_tbl[10]},
 };
 
 #define POWER_COLLAPSE_KHZ MAX_AXI_KHZ
