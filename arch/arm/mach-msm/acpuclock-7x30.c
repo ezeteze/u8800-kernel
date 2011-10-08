@@ -95,7 +95,7 @@ static struct clkctl_acpu_speed *backup_s;
 static struct pll pll2_tbl[] = {
 	{ 25, 0, 1, 0 },  /* 480 MHz */
 	{ 28, 1, 3, 0 },  /* 544 MHz */
-	{ 31, 1, 4, 0 },  /* 600 MHz */https://github.com/dzo/kernel_u8800/blob/1fa7a26cfc8b87166a02a987fad7959a52015ae0/arch/arm/mach-msm/acpuclock-7x30.c
+	{ 31, 1, 4, 0 },  /* 600 MHz */
 	{ 42, 0, 1, 0 },  /* 806 MHz */
 	{ 53, 1, 3, 0 },  /* 1024 MHz */
 	{ 125, 0, 1, 1 }, /* 1200 MHz */
