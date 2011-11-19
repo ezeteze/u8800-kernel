@@ -491,6 +491,7 @@ EXPORT_SYMBOL(kernel_thread);
 
 unsigned long get_wchan(struct task_struct *p)
 {
+/*
 	struct stackframe frame;
 	int count = 0;
 	if (!p || p == current || p->state == TASK_RUNNING)
@@ -498,7 +499,7 @@ unsigned long get_wchan(struct task_struct *p)
 
 	frame.fp = thread_saved_fp(p);
 	frame.sp = thread_saved_sp(p);
-	frame.lr = 0;			/* recovered from the stack */
+	frame.lr = 0;			// recovered from the stack 
 	frame.pc = thread_saved_pc(p);
 	do {
 		int ret = unwind_frame(&frame);
@@ -506,6 +507,6 @@ unsigned long get_wchan(struct task_struct *p)
 			return 0;
 		if (!in_sched_functions(frame.pc))
 			return frame.pc;
-	} while (count ++ < 16);
+	} while (count ++ < 16); */
 	return 0;
 }

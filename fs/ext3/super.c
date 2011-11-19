@@ -626,10 +626,11 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_printf(seq, ",commit=%u",
 			   (unsigned) (sbi->s_commit_interval / HZ));
 	}
-	if (test_opt(sb, BARRIER))
-		seq_puts(seq, ",barrier=1");
-	if (test_opt(sb, NOBH))
-		seq_puts(seq, ",nobh");
+	//if (test_opt(sb, BARRIER))
+	seq_puts(seq, ",barrier=0");
+	//if (test_opt(sb, NOBH))
+	seq_puts(seq, ",nobh");
+	seq_puts(seq, ",noauto_da_alloc");	
 
 	seq_printf(seq, ",data=%s", data_mode_string(sbi->s_mount_opt &
 						     EXT3_MOUNT_DATA_FLAGS));
