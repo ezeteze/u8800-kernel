@@ -1,4 +1,3 @@
-
 /* drivers/input/keyboard/synaptics_i2c_rmi.c
  *
  * Copyright (C) 2007 Google, Inc.
@@ -218,7 +217,7 @@ static void synaptics_rmi4_early_suspend(struct early_suspend *h);
 static void synaptics_rmi4_late_resume(struct early_suspend *h);
 #endif
 
-static int dup_threshold=1;
+static int dup_threshold=0;
 module_param(dup_threshold, int, 00644);
 
 static int debug=0;
@@ -273,28 +272,6 @@ static int duplicated_filter( int x, int y, int x1, int y1,
 
     return 0;
 }
-/*
-   
-    if (z>0) {
-    ref_x[0] = x;
-    ref_y[0] = y;
-    } 
-
-    if (z1>0) {
-        ref_x[1] = x1;
-        ref_y[1] = y1;
-    }
-
-    if (z == 0) {
-        ref_x[0] = ref_y[0] = 0;
-    }
-    if (z1 == 0) {
-        ref_x[1] = ref_y[1] = 0;
-    }
-
-    return 0;
-}*/
-
 
 static int synaptics_rmi4_read_pdt(struct synaptics_rmi4 *ts)
 {
@@ -541,11 +518,7 @@ static int synaptics_rmi4_read_pdt(struct synaptics_rmi4 *ts)
 /*===========================================================================
 FUNCTION      is_in_extra_region
 DESCRIPTION
-<<<<<<< HEAD
-              �Ƿ��ڸ���TOUCH��
-=======
               是否在附加TOUCH区
->>>>>>> a884586... Fix filter discarding release event of second finger when first finger is stationary
 DEPENDENCIES
   None
 RETURN VALUE
@@ -569,11 +542,7 @@ static bool is_in_extra_region(int pos_x, int pos_y)
 /*===========================================================================
 FUNCTION      touch_get_extra_keycode
 DESCRIPTION
-<<<<<<< HEAD
-              ȡ�ø�������ֵ
-=======
               取得附加区键值
->>>>>>> a884586... Fix filter discarding release event of second finger when first finger is stationary
 DEPENDENCIES
   None
 RETURN VALUE
@@ -676,9 +645,9 @@ static void synaptics_rmi4_work_func(struct work_struct *work)
 				wy1 = finger_reg[3] >> 4;
 				z1 = finger_reg[4];
 				if(x>ts->f11_max_x-1)
-          			  x=ts->f11_max_x-1;
-        			if(x<1)
-          			  x=1;
+					x=ts->f11_max_x-1;
+				if(x<1)
+					x=1;
 				if (z) {
 					input_report_abs(ts->input_dev, ABS_X,
 							 x);
@@ -934,7 +903,7 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 	TS_DEBUG_RMI("the power is ok\n");
 	if (ret)
 		goto err_power_on_failed;
-	mdelay(10);
+	mdelay(50);
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		printk(KERN_ERR "%s: need I2C_FUNC_I2C\n", __func__);
@@ -1244,7 +1213,7 @@ static int synaptics_rmi4_resume(struct i2c_client *client)
 		printk(KERN_ERR
 		       "synaptics_ts_resume: the touch can't resume! \n");
 	}
-	mdelay(10);
+	mdelay(50);
 	if (ts->use_irq) {
 		enable_irq(client->irq);
 	} else
