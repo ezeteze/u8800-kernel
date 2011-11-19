@@ -208,8 +208,13 @@ void __cpuinit calibrate_delay(void)
 	}
 	if (!printed)
 		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
+<<<<<<< HEAD
 			lpj/(500000/HZ),
 			(lpj * 10 /(50000/HZ)) % 100, lpj);
+=======
+			loops_per_jiffy/(500000/HZ),
+			(loops_per_jiffy/(5000/HZ)) % 100, loops_per_jiffy);
+>>>>>>> parent of 0263157... Ck2 patch
 
 	loops_per_jiffy = lpj;
 	printed = true;

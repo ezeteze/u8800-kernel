@@ -36,7 +36,6 @@
 #include <linux/rwsem.h>
 #include <linux/delay.h>
 #include <linux/kthread.h>
-#include <linux/timer.h>
 #include <linux/freezer.h>
 #include <linux/memcontrol.h>
 #include <linux/delayacct.h>
@@ -211,11 +210,8 @@ unsigned long shrink_slab(unsigned long scanned, gfp_t gfp_mask,
 	if (scanned == 0)
 		scanned = SWAP_CLUSTER_MAX;
 
-	if (!down_read_trylock(&shrinker_rwsem)) {
-	    /* Assume we'll be able to shrink next time */
-	    ret = 1;
-	    goto out;
-  	}
+	if (!down_read_trylock(&shrinker_rwsem))
+		return 1;	/* Assume we'll be able to shrink next time */
 
 	list_for_each_entry(shrinker, &shrinker_list, list) {
 		unsigned long long delta;
@@ -264,9 +260,6 @@ unsigned long shrink_slab(unsigned long scanned, gfp_t gfp_mask,
 		shrinker->nr += total_scan;
 	}
 	up_read(&shrinker_rwsem);
-
-out:
-  	cond_resched();
 	return ret;
 }
 
@@ -1089,46 +1082,38 @@ static int too_many_isolated(struct zone *zone, int file,
 	return isolated > inactive;
 }
 
-/*
- * Returns true if the caller should wait to clean dirty/writeback pages.
- *
- * If we are direct reclaiming for contiguous pages and we do not reclaim
- * everything in the list, try again and wait for writeback IO to complete.
- * This will stall high-order allocations noticeably. Only do that when really
- * need to free the pages under high memory pressure.
- */
 static inline bool should_reclaim_stall(unsigned long nr_taken,
-					unsigned long nr_freed,
-					int priority,
-					int lumpy_reclaim,
-					struct scan_control *sc)
+                                       unsigned long nr_freed,
+                                       int priority,
+                                       int lumpy_reclaim,
+                                       struct scan_control *sc)
 {
-	int lumpy_stall_priority;
+       int lumpy_stall_priority;
 
-	/* kswapd should not stall on sync IO */
-	if (current_is_kswapd())
-		return false;
+       /* kswapd should not stall on sync IO */
+       if (current_is_kswapd())
+               return false;
 
-	/* Only stall on lumpy reclaim */
-	if (!lumpy_reclaim)
-		return false;
+       /* Only stall on lumpy reclaim */
+       if (!lumpy_reclaim)
+               return false;
 
-	/* If we have relaimed everything on the isolated list, no stall */
-	if (nr_freed == nr_taken)
-		return false;
+       /* If we have relaimed everything on the isolated list, no stall */
+       if (nr_freed == nr_taken)
+               return false;
 
-	/*
-	 * For high-order allocations, there are two stall thresholds.
-	 * High-cost allocations stall immediately where as lower
-	 * order allocations such as stacks require the scanning
-	 * priority to be much higher before stalling.
-	 */
-	if (sc->order > PAGE_ALLOC_COSTLY_ORDER)
-		lumpy_stall_priority = DEF_PRIORITY;
-	else
-		lumpy_stall_priority = DEF_PRIORITY / 3;
+       /*
+        * For high-order allocations, there are two stall thresholds.
+        * High-cost allocations stall immediately where as lower
+        * order allocations such as stacks require the scanning
+        * priority to be much higher before stalling.
+        */
+       if (sc->order > PAGE_ALLOC_COSTLY_ORDER)
+               lumpy_stall_priority = DEF_PRIORITY;
+       else
+               lumpy_stall_priority = DEF_PRIORITY / 3;
 
-	return priority <= lumpy_stall_priority;
+       return priority <= lumpy_stall_priority;
 }
 
 /*
@@ -1225,9 +1210,8 @@ static unsigned long shrink_inactive_list(unsigned long max_scan,
 		nr_scanned += nr_scan;
 		nr_freed = shrink_page_list(&page_list, sc, PAGEOUT_IO_ASYNC);
 
-		/* Check if we should syncronously wait for writeback */
 		if (should_reclaim_stall(nr_taken, nr_freed, priority,
-					lumpy_reclaim, sc)) {
+          		lumpy_reclaim, sc)) {
 			congestion_wait(BLK_RW_ASYNC, HZ/10);
 
 			/*
@@ -1627,36 +1611,40 @@ static void get_scan_ratio(struct zone *zone, struct scan_control *sc,
 }
 
 /*
+ * Smallish @nr_to_scan's are deposited in @nr_saved_scan,
+ * until we collected @swap_cluster_max pages to scan.
+ */
+static unsigned long nr_scan_try_batch(unsigned long nr_to_scan,
+				       unsigned long *nr_saved_scan,
+				       unsigned long swap_cluster_max)
+{
+	unsigned long nr;
+
+	*nr_saved_scan += nr_to_scan;
+	nr = *nr_saved_scan;
+
+	if (nr >= swap_cluster_max)
+		*nr_saved_scan = 0;
+	else
+		nr = 0;
+
+	return nr;
+}
+
+/*
  * This is a basic per-zone page freer.  Used by both kswapd and direct reclaim.
  */
 static void shrink_zone(int priority, struct zone *zone,
 				struct scan_control *sc)
 {
 	unsigned long nr[NR_LRU_LISTS];
-	unsigned long anon, file, nr_to_scan;
+	unsigned long nr_to_scan;
 	unsigned long percent[2];	/* anon @ 0; file @ 1 */
 	enum lru_list l;
 	unsigned long nr_reclaimed = sc->nr_reclaimed;
 	unsigned long swap_cluster_max = sc->swap_cluster_max;
 	struct zone_reclaim_stat *reclaim_stat = get_reclaim_stat(zone, sc);
 	int noswap = 0;
-	int tmp_priority;
-	int force_scan = 0;
- 
-       anon  = zone_nr_lru_pages(zone, sc, LRU_ACTIVE_ANON) +
-               zone_nr_lru_pages(zone, sc, LRU_INACTIVE_ANON);
-
-       file  = zone_nr_lru_pages(zone, sc, LRU_ACTIVE_FILE) +
-               zone_nr_lru_pages(zone, sc, LRU_INACTIVE_FILE);
-
-       if (((anon + file) >> priority) < SWAP_CLUSTER_MAX) {
-               /* kswapd does zone balancing and need to scan this zone */
-               if (scanning_global_lru(sc) && current_is_kswapd())
-                       force_scan = 1;
-               /* memcg may have small limit and need to avoid priority drop */
-               if (!scanning_global_lru(sc))
-                       force_scan = 1;
-       }
 
 	/* If we have no swap space, do not bother scanning anon pages. */
 	if (!sc->may_swap || (nr_swap_pages <= 0)) {
@@ -1672,20 +1660,12 @@ static void shrink_zone(int priority, struct zone *zone,
 
 		scan = zone_nr_lru_pages(zone, sc, l);
 		if (priority || noswap) {
-			tmp_priority = priority;
-
-		      	if (file && priority > 0)
-				tmp_priority = DEF_PRIORITY;
-		      	scan >>= tmp_priority;
+			scan >>= priority;
 			scan = (scan * percent[file]) / 100;
 		}
-		if (!scan && force_scan) {
-        if (file)
-      scan = SWAP_CLUSTER_MAX;
-        else if (!noswap)
-      scan = SWAP_CLUSTER_MAX;
-    }
-    nr[l] = scan;
+		nr[l] = nr_scan_try_batch(scan,
+					  &reclaim_stat->nr_saved_scan[l],
+					  swap_cluster_max);
 	}
 
 	while (nr[LRU_INACTIVE_ANON] || nr[LRU_ACTIVE_FILE] ||
@@ -1722,35 +1702,6 @@ static void shrink_zone(int priority, struct zone *zone,
 		shrink_active_list(SWAP_CLUSTER_MAX, zone, sc, priority, 0);
 
 	throttle_vm_writeout(sc->gfp_mask);
-}
-
-/*
- * Helper functions to adjust nice level of kswapd, based on the priority of
- * the task (p) that called it. If it is already higher priority we do not
- * demote its nice level since it is still working on behalf of a higher
- * priority task. With kernel threads we leave it at nice 0.
- *
- * We don't ever run kswapd real time, so if a real time task calls kswapd we
- * set it to highest SCHED_NORMAL priority.
- */
-static inline int effective_sc_prio(struct task_struct *p)
-{
-  if (likely(p->mm)) {
-    if (rt_task(p))
-      return -20;
-    if (p->policy == SCHED_IDLEPRIO)
-      return 19;
-    return task_nice(p);
-  }
-  return 0;
-}
-
-static void set_kswapd_nice(struct task_struct *kswapd, int active)
-{
-  long nice = effective_sc_prio(current);
-
-  if (task_nice(kswapd) > nice || !active)
-    set_user_nice(kswapd, nice);
 }
 
 /*
@@ -2222,8 +2173,6 @@ out:
 	return sc.nr_reclaimed;
 }
 
-#define WT_EXPIRY  (HZ * 5)  /* Time to wakeup watermark_timer */
-
 /*
  * The background pageout daemon, started as a kernel thread
  * from the init process.
@@ -2253,7 +2202,7 @@ static int kswapd(void *p)
 	if (!cpumask_empty(cpumask))
 		set_cpus_allowed_ptr(tsk, cpumask);
 	current->reclaim_state = &reclaim_state;
-set_user_nice(tsk, 0);
+
 	/*
 	 * Tell the memory management that we're a "memory allocator",
 	 * and that if we need more memory we should get access to it
@@ -2273,8 +2222,6 @@ set_user_nice(tsk, 0);
 	for ( ; ; ) {
 		unsigned long new_order;
 
-		/* kswapd has been busy so delay watermark_timer */
-    		mod_timer(&pgdat->watermark_timer, jiffies + WT_EXPIRY);
 		prepare_to_wait(&pgdat->kswapd_wait, &wait, TASK_INTERRUPTIBLE);
 		new_order = pgdat->kswapd_max_order;
 		pgdat->kswapd_max_order = 0;
@@ -2287,8 +2234,7 @@ set_user_nice(tsk, 0);
 		} else {
 			if (!freezing(current))
 				schedule();
-			
-			set_user_nice(tsk, 0);
+
 			order = pgdat->kswapd_max_order;
 		}
 		finish_wait(&pgdat->kswapd_wait, &wait);
@@ -2309,7 +2255,6 @@ set_user_nice(tsk, 0);
 void wakeup_kswapd(struct zone *zone, int order)
 {
 	pg_data_t *pgdat;
-	int active;
 
 	if (!populated_zone(zone))
 		return;
@@ -2321,9 +2266,7 @@ void wakeup_kswapd(struct zone *zone, int order)
 		pgdat->kswapd_max_order = order;
 	if (!cpuset_zone_allowed_hardwall(zone, GFP_KERNEL))
 		return;
-	active = waitqueue_active(&pgdat->kswapd_wait);
-  	set_kswapd_nice(pgdat->kswapd, active);
-  	if (!active)
+	if (!waitqueue_active(&pgdat->kswapd_wait))
 		return;
 	wake_up_interruptible(&pgdat->kswapd_wait);
 }
@@ -2535,57 +2478,20 @@ static int __devinit cpu_callback(struct notifier_block *nfb,
 }
 
 /*
- * We wake up kswapd every WT_EXPIRY till free ram is above pages_lots
- */
-static void watermark_wakeup(unsigned long data)
-{
-  pg_data_t *pgdat = (pg_data_t *)data;
-  struct timer_list *wt = &pgdat->watermark_timer;
-  int i;
-
-  if (!waitqueue_active(&pgdat->kswapd_wait) || above_background_load())
-    goto out;
-  for (i = pgdat->nr_zones - 1; i >= 0; i--) {
-    struct zone *z = pgdat->node_zones + i;
-
-    if (!populated_zone(z) || is_highmem(z)) {
-      /* We are better off leaving highmem full */
-      continue;
-    }
-    if (!zone_watermark_ok(z, 0, lots_wmark_pages(z), 0, 0)) {
-      wake_up_interruptible(&pgdat->kswapd_wait);
-      goto out;
-    }
-  }
-out:
-  mod_timer(wt, jiffies + WT_EXPIRY);
-  return;
-}
-
-/*
  * This kswapd start function will be called by init and node-hot-add.
  * On node-hot-add, kswapd will moved to proper cpus if cpus are hot-added.
  */
 int kswapd_run(int nid)
 {
 	pg_data_t *pgdat = NODE_DATA(nid);
-	struct timer_list *wt;
 	int ret = 0;
 
 	if (pgdat->kswapd)
 		return 0;
 
-	wt = &pgdat->watermark_timer;
-  	init_timer(wt);
-  	wt->data = (unsigned long)pgdat;
-  	wt->function = watermark_wakeup;
-  	wt->expires = jiffies + WT_EXPIRY;
-  	add_timer(wt);
-
 	pgdat->kswapd = kthread_run(kswapd, pgdat, "kswapd%d", nid);
 	if (IS_ERR(pgdat->kswapd)) {
 		/* failure at boot is fatal */
-		del_timer(wt);
 		BUG_ON(system_state == SYSTEM_BOOTING);
 		printk("Failed to start kswapd on node %d\n",nid);
 		ret = -1;
@@ -3054,3 +2960,4 @@ void scan_unevictable_unregister_node(struct node *node)
 {
 	sysdev_remove_file(&node->sysdev, &attr_scan_unevictable_pages);
 }
+
