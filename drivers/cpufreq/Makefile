@@ -15,6 +15,8 @@ obj-$(CONFIG_CPU_FREQ_GOV_SCARY)	 += cpufreq_scary.o
 obj-$(CONFIG_CPU_FREQ_GOV_MINMAX)	 += cpufreq_minmax.o
 obj-$(CONFIG_CPU_FREQ_GOV_INTERACTIVEX)  += cpufreq_interactivex.o
 obj-$(CONFIG_CPU_FREQ_GOV_LAZY)      	 += cpufreq_lazy.o
+obj-$(CONFIG_CPU_FREQ_GOV_LAGFREE)      += cpufreq_lagfree.o
+#obj-$(CONFIG_CPU_FREQ_GOV_LULZACTIVE)	+= cpufreq_lulzactive.o
 
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
