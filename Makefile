@@ -181,7 +181,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= arm
-CROSS_COMPILE	?= /home/francisco/Downloads/toolchain/android-toolchain-eabi/bin/arm-eabi-
+CROSS_COMPILE	?= /home/ezet/arm-bin/bin/arm-none-eabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -551,10 +551,10 @@ else
 KBUILD_CFLAGS	+= -fomit-frame-pointer
 endif
 
-#ifdef CONFIG_DEBUG_INFO
-#KBUILD_CFLAGS	+= -g
-#KBUILD_AFLAGS	+= -gdwarf-2
-#endif
+ifdef CONFIG_DEBUG_INFO
+KBUILD_CFLAGS	+= -g
+KBUILD_AFLAGS	+= -gdwarf-2
+endif
 
 ifdef CONFIG_FUNCTION_TRACER
 KBUILD_CFLAGS	+= -pg
