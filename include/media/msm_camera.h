@@ -1,34 +1,19 @@
-/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2009, Code Aurora Forum. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, and the entire permission notice in its entirety,
- *    including the disclaimer of warranties.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote
- *    products derived from this software without specific prior
- *    written permission.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
  *
- * ALTERNATIVELY, this product may be distributed under the terms of
- * the GNU General Public License, version 2, in which case the provisions
- * of the GPL version 2 are required INSTEAD OF the BSD license.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ALL OF
- * WHICH ARE HEREBY DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
- * USE OF THIS SOFTWARE, EVEN IF NOT ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ *
  */
 
 #ifndef __LINUX_MSM_CAMERA_H
@@ -38,16 +23,14 @@
 #include <sys/types.h>
 #endif
 #include <linux/types.h>
+#include <asm/sizes.h>
 #include <linux/ioctl.h>
 #ifdef MSM_CAMERA_GCC
 #include <time.h>
 #else
 #include <linux/time.h>
 #endif
-/*< DTS2011041700393 lijianzhao 20110417 begin */
-/* modify for 4125 baseline */
-#include <linux/slab.h>
-/* DTS2011041700393 lijianzhao 20110417 end >*/
+
 #define MSM_CAM_IOCTL_MAGIC 'm'
 
 #define MSM_CAM_IOCTL_GET_SENSOR_INFO \
@@ -113,6 +96,10 @@
 #define MSM_CAM_IOCTL_SENSOR_IO_CFG \
 	_IOW(MSM_CAM_IOCTL_MAGIC, 21, struct sensor_cfg_data *)
 
+#define MSM_CAMERA_LED_OFF  0
+#define MSM_CAMERA_LED_LOW  1
+#define MSM_CAMERA_LED_HIGH 2
+
 #define MSM_CAM_IOCTL_FLASH_LED_CFG \
 	_IOW(MSM_CAM_IOCTL_MAGIC, 22, unsigned *)
 
@@ -124,51 +111,10 @@
 
 #define MSM_CAM_IOCTL_AF_CTRL \
 	_IOR(MSM_CAM_IOCTL_MAGIC, 25, struct msm_ctrl_cmt_t *)
-
 #define MSM_CAM_IOCTL_AF_CTRL_DONE \
 	_IOW(MSM_CAM_IOCTL_MAGIC, 26, struct msm_ctrl_cmt_t *)
 
-#define MSM_CAM_IOCTL_CONFIG_VPE \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 27, struct msm_camera_vpe_cfg_cmd *)
-
-#define MSM_CAM_IOCTL_AXI_VPE_CONFIG \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 28, struct msm_camera_vpe_cfg_cmd *)
-
-#define MSM_CAM_IOCTL_STROBE_FLASH_CFG \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 29, uint32_t *)
-
-#define MSM_CAM_IOCTL_STROBE_FLASH_CHARGE \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 30, uint32_t *)
-
-#define MSM_CAM_IOCTL_STROBE_FLASH_RELEASE \
-	_IO(MSM_CAM_IOCTL_MAGIC, 31)
-
-#define MSM_CAM_IOCTL_FLASH_CTRL \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 32, struct flash_ctrl_data *)
-
-#define MSM_CAM_IOCTL_ERROR_CONFIG \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 33, uint32_t *)
-
-#define MSM_CAM_IOCTL_ABORT_CAPTURE \
-	_IO(MSM_CAM_IOCTL_MAGIC, 34)
-
-#define MSM_CAM_IOCTL_SET_FD_ROI \
-	_IOW(MSM_CAM_IOCTL_MAGIC, 35, struct fd_roi_info *)
-
-#define MSM_CAM_IOCTL_GET_CAMERA_INFO \
-	_IOR(MSM_CAM_IOCTL_MAGIC, 36, struct msm_camera_info *)
-
-#define MSM_CAMERA_LED_OFF  0
-#define MSM_CAMERA_LED_LOW  1
-#define MSM_CAMERA_LED_HIGH 2
-/* < DTS2011072705129     xiangxu 20110728 begin */
-#define MSM_CAMERA_LED_TORCH 3
-/* DTS2011072705129     xiangxu 20110728 end >  */
-
-#define MSM_CAMERA_STROBE_FLASH_NONE 0
-#define MSM_CAMERA_STROBE_FLASH_XENON 1
-
-#define MSM_MAX_CAMERA_SENSORS  5
+#define MAX_SENSOR_NUM  3
 #define MAX_SENSOR_NAME 32
 
 #define PP_SNAP  0x01
@@ -204,32 +150,7 @@ struct msm_vfe_evt_msg {
 	unsigned short type;	/* 1 == event (RPC), 0 == message (adsp) */
 	unsigned short msg_id;
 	unsigned int len;	/* size in, number of bytes out */
-	uint32_t frame_id;
 	void *data;
-};
-
-struct msm_isp_evt_msg {
-	unsigned short type;	/* 1 == event (RPC), 0 == message (adsp) */
-	unsigned short msg_id;
-	unsigned int len;	/* size in, number of bytes out */
-	/* maximum possible data size that can be
-i	  sent to user space as v4l2 data structure
-	  is only of 64 bytes */
-	uint8_t data[48];
-};
-struct msm_vpe_evt_msg {
-	unsigned short type; /* 1 == event (RPC), 0 == message (adsp) */
-	unsigned short msg_id;
-	unsigned int len; /* size in, number of bytes out */
-	uint32_t frame_id;
-	void *data;
-};
-struct msm_isp_stats_event_ctrl {
-	unsigned short resptype;
-	union {
-		struct msm_isp_evt_msg isp_msg;
-		struct msm_ctrl_cmd ctrl;
-	} isp_data;
 };
 
 #define MSM_CAM_RESP_CTRL         0
@@ -308,17 +229,9 @@ struct msm_camera_cfg_cmd {
 #define CMD_STATS_IHIST_ENABLE 38
 #define CMD_STATS_RS_ENABLE 39
 #define CMD_STATS_CS_ENABLE 40
-#define CMD_VPE 41
-#define CMD_AXI_CFG_VPE 42
 
 /* vfe config command: config command(from config thread)*/
 struct msm_vfe_cfg_cmd {
-	int cmd_type;
-	uint16_t length;
-	void *value;
-};
-
-struct msm_vpe_cfg_cmd {
 	int cmd_type;
 	uint16_t length;
 	void *value;
@@ -345,8 +258,8 @@ struct camera_enable_cmd {
 #define MSM_PMEM_SKIN			13
 #define MSM_PMEM_VIDEO			14
 #define MSM_PMEM_PREVIEW		15
-#define MSM_PMEM_VIDEO_VPE		16
-#define MSM_PMEM_MAX			17
+#define MSM_PMEM_MAX			16
+
 
 #define STAT_AEAW			0
 #define STAT_AEC			1
@@ -397,16 +310,10 @@ struct outputCfg {
 #define MSM_FRAME_PREV_2	1
 #define MSM_FRAME_ENC		2
 
-#define OUTPUT_TYPE_P		(1<<0)
-#define OUTPUT_TYPE_T		(1<<1)
-#define OUTPUT_TYPE_S		(1<<2)
-#define OUTPUT_TYPE_V		(1<<3)
-#define OUTPUT_TYPE_L		(1<<4)
-
-struct fd_roi_info {
-	void *info;
-	int info_len;
-};
+#define OUTPUT_TYPE_P		1
+#define OUTPUT_TYPE_T		2
+#define OUTPUT_TYPE_S		3
+#define OUTPUT_TYPE_V		4
 
 struct msm_frame {
 	struct timespec ts;
@@ -418,11 +325,7 @@ struct msm_frame {
 
 	void *cropinfo;
 	int croplen;
-	uint32_t error_code;
-	struct fd_roi_info roi_info;
 };
-
-#define MSM_CAMERA_ERR_MASK (0xFFFFFFFF & 1)
 
 struct msm_stats_buf {
 	int type;
@@ -488,17 +391,7 @@ struct msm_snapshot_pp_status {
 #define CFG_GET_AF_MAX_STEPS		26
 #define CFG_GET_PICT_MAX_EXP_LC		27
 #define CFG_SEND_WB_INFO    28
-/*< DTS2011072801699   songxiaoming 20110728 begin */
-//#define CFG_MAX 			29
-/*lijuan add for AWB OTP*/
-#define CFG_GET_CALIB_DATA 29
-#define CFG_MAX 30
-/* DTS2011072801699   songxiaoming 20110728 end > */
-
-/* < DTS2011090701903 zhangyu 20110907 begin */
-#define CFG_SET_NR          32
-#define CFG_RESET           31
-/* DTS2011090701903 zhangyu 20110907 end > */ 
+#define CFG_MAX 			29
 
 #define MOVE_NEAR	0
 #define MOVE_FAR	1
@@ -549,22 +442,6 @@ struct wb_info_cfg {
 	uint16_t green_gain;
 	uint16_t blue_gain;
 };
-
-/*< DTS2011072801699   songxiaoming 20110728 begin */
-//lijuan add for AWB OTP
-struct sensor_cilb_cfg{
-
- uint16_t r_over_g;
- uint16_t b_over_g;
- uint16_t gr_over_gb;
- uint16_t macro_2_inf;
-  uint16_t inf_2_macro;
- uint16_t stroke_amt;
-  uint16_t af_pos_1m;
- uint16_t af_pos_inf;
- 
-};
-/* DTS2011072801699   songxiaoming 20110728 end > */
 struct sensor_cfg_data {
 	int cfgtype;
 	int mode;
@@ -574,9 +451,6 @@ struct sensor_cfg_data {
 	union {
 		int8_t effect;
 		uint8_t lens_shading;
-		/* < DTS2011090701903 zhangyu 20110907 begin */
-		uint8_t lut_index;
-		/* DTS2011090701903 zhangyu 20110907 end > */ 
 		uint16_t prevl_pf;
 		uint16_t prevp_pl;
 		uint16_t pictl_pf;
@@ -588,41 +462,7 @@ struct sensor_cfg_data {
 		struct focus_cfg focus;
 		struct fps_cfg fps;
 		struct wb_info_cfg wb_info;
-		/*< DTS2011072801699   songxiaoming 20110728 begin */
-		struct sensor_cilb_cfg calib_info;//lijuan add for AWB OTP
-		/* DTS2011072801699   songxiaoming 20110728 end > */
 	} cfg;
-};
-
-enum flash_type {
-	LED_FLASH,
-	STROBE_FLASH,
-};
-
-enum strobe_flash_ctrl_type {
-	STROBE_FLASH_CTRL_INIT,
-	STROBE_FLASH_CTRL_CHARGE,
-	STROBE_FLASH_CTRL_RELEASE
-};
-
-struct strobe_flash_ctrl_data {
-	enum strobe_flash_ctrl_type type;
-	int charge_en;
-};
-
-struct msm_camera_info {
-	int num_cameras;
-	uint8_t has_3d_support[MSM_MAX_CAMERA_SENSORS];
-	uint8_t is_internal_cam[MSM_MAX_CAMERA_SENSORS];
-	uint32_t s_mount_angle[MSM_MAX_CAMERA_SENSORS];
-};
-
-struct flash_ctrl_data {
-	int flashtype;
-	union {
-		int led_state;
-		struct strobe_flash_ctrl_data strobe_ctrl;
-	} ctrl_data;
 };
 
 #define GET_NAME			0
