@@ -45,12 +45,12 @@ static void msm_keypad_bl_led_set(struct led_classdev *led_cdev,
     {
 
 	if(disable_keypad_leds) value = 0;
-      	  ret = pmic_set_led_intensity(LED_KEYPAD, value / LED_FULL);
+      	  ret = pmic_set_led_intensity(LED_KEYPAD, value /32);
     }
         
     if(machine_is_msm7x30_u8820())
     {   
-      ret = pmic_set_mpp6_led_intensity(value / LED_FULL);
+      ret = pmic_set_mpp6_led_intensity(value /32);
     }
     if (ret)
 		dev_err(led_cdev->dev, "can't set keypad backlight\n");

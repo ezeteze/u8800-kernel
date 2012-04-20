@@ -28,7 +28,7 @@
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(15)
+#define DEF_FREQUENCY_DOWN_DIFFERENTIAL		(20)
 #define DEF_FREQUENCY_UP_THRESHOLD		(80)
 #define DEF_SAMPLING_DOWN_FACTOR		(60)
 #define MAX_SAMPLING_DOWN_FACTOR		(100000)
