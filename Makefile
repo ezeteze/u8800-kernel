@@ -327,7 +327,7 @@ CFLAGS_MODULE   = $(MODFLAGS) -fgcse -fsched-spec-load-dangerous -fforce-addr -f
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
 CFLAGS_KERNEL	= -fgcse -fsched-spec-load-dangerous -fforce-addr -ffast-math -funsafe-math-optimizations -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=vfpv3 -ftree-vectorize -pipe
-AFLAGS_KERNEL	= 
+AFLAGS_KERNEL	= -fgcse -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=vfpv3 -ftree-vectorize 
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -347,7 +347,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-delete-null-pointer-checks \
 		   -mtune=cortex-a8 \
               	   -march=armv7-a
-		   -mfpu=vfpv3
+		   -mfpu=neon
 		   
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 
